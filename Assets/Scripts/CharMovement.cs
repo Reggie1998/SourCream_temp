@@ -23,6 +23,8 @@ public class CharMovement : MonoBehaviour
 
     private bool movementKeyPressed = false;
 
+    private float currentRotation;
+
 
     // ------------------------------- PHYSICS ------------------------------- //
     [SerializeField]
@@ -35,6 +37,8 @@ public class CharMovement : MonoBehaviour
     Animator animator;
     int isWalkingHash;
     int isRunningHash;
+    int forward;
+    int right;
 
 
     // Start is called before the first frame update
@@ -42,6 +46,8 @@ public class CharMovement : MonoBehaviour
     {
         isWalkingHash = Animator.StringToHash("isWalking");
         isRunningHash = Animator.StringToHash("isRunning");
+        forward = Animator.StringToHash("forward");
+        right = Animator.StringToHash("right");
     }
 
     void Awake()
@@ -71,8 +77,6 @@ public class CharMovement : MonoBehaviour
         } else {
             lateralVelocity = Vector2.Lerp(lateralAirVelocity, lateralVelocity, airTurnSpeed);
         }
-        Debug.Log(charController.isGrounded);
-        Debug.Log(inputVelocity.y);
         lateralVelocity *= movementSpeed;
         charController.Move(new Vector3(lateralVelocity.x, inputVelocity.y, lateralVelocity.y) * Time.deltaTime);
     }
@@ -88,7 +92,7 @@ public class CharMovement : MonoBehaviour
         }
     }
 
-    public void OnMove(InputAction.CallbackContext ctx)
+    public void OnMove(InputAction.CallbackContext ctx) // TODO: these events run 2-3 times on click consider doing only once through logic
     {
         var incVelocity = ctx.ReadValue<Vector2>().normalized;
         if(ctx.canceled) {
@@ -102,7 +106,9 @@ public class CharMovement : MonoBehaviour
         if (!(incVelocity.x == 0 && incVelocity.y == 0 && !charController.isGrounded))
         {
             Vector3 velocity = new Vector3(incVelocity.x, inputVelocity.y, incVelocity.y);
+
             inputVelocity = velocity;
+            
         }
     }
 
@@ -110,23 +116,11 @@ public class CharMovement : MonoBehaviour
     {
         if (charController.isGrounded)
         {
-            if (charController.velocity.magnitude > 3)
-            {
-                animator.SetBool(isWalkingHash, true);
-            }
-            else
-            {
-                animator.SetBool(isWalkingHash, false);
-            }
-
-            if (charController.velocity.magnitude > 7)
-            {
-                animator.SetBool(isRunningHash, true);
-            }
-            else
-            {
-                animator.SetBool(isRunningHash, false);
-            }
+            var tempForward = Vector3.Dot(transform.forward, new Vector3(inputVelocity.x, 0.0f,inputVelocity.z)) * 10;
+            var tempRight = Vector3.Dot(transform.right, new Vector3(inputVelocity.x, 0.0f,inputVelocity.z)) * 10;
+            animator.SetFloat(forward, tempForward);
+            animator.SetFloat(right, tempRight);
+            
         }
     }
 
@@ -142,7 +136,10 @@ public class CharMovement : MonoBehaviour
         mousePosition.x = mousePosition.x - objPosition.x;
         mousePosition.y = mousePosition.y - objPosition.y;
         angle = Mathf.Atan2(mousePosition.y, mousePosition.x) * Mathf.Rad2Deg;
-        target.rotation = Quaternion.Euler(new Vector3(0, -angle + 90, 0)); //MAKE THIS LOOK TOWARDS CURSOR
+        var roatation = Quaternion.Euler(new Vector3(0, -angle + 90, 0));
+        target.rotation = roatation; 
+        //animator.SetFloat(horizontalValue, roatation.eulerAngles.y);
+        //Debug.Log(target.rotation.eulerAngles.y);
     }
 
     public void OnJump(InputAction.CallbackContext ctx)
@@ -158,6 +155,23 @@ public class CharMovement : MonoBehaviour
         if (ctx.performed && charController.isGrounded)
         {
             inputVelocity.y = jumpVelocity;
+        }
+    }
+
+
+    void updateHorizontalAndLater()
+    {
+        
+
+    }
+
+    public void onFire(InputAction.CallbackContext ctx)
+    {   
+        if (ctx.started) {
+            Debug.Log(animator.GetFloat(forward));
+            Debug.Log(animator.GetFloat(right));
+
+            //Debug.Log();
         }
     }
 }
