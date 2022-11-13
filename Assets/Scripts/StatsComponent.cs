@@ -8,6 +8,9 @@ public class StatsComponent : MonoBehaviour
     private Health health = new Health();
 
     [SerializeField]
+    private Affinity affinity = new Affinity(0.0f, 0.0f, 0.0f); // Character proficiency in each affinity
+
+    [SerializeField]
     private Dictionary<string, Modifier> modifiers;
 
     [InspectorButton("ApplyModifier")]

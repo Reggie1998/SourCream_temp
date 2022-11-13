@@ -126,20 +126,12 @@ public class CharMovement : MonoBehaviour
 
     void HandleRotation()
     {
-        Vector3 mousePosition;
-        Vector3 objPosition;
-        Transform target = transform;
-        float angle;
-        mousePosition = Input.mousePosition;
-        mousePosition.z = 10.0f;
-        objPosition = Camera.main.WorldToScreenPoint(target.position);
-        mousePosition.x = mousePosition.x - objPosition.x;
-        mousePosition.y = mousePosition.y - objPosition.y;
-        angle = Mathf.Atan2(mousePosition.y, mousePosition.x) * Mathf.Rad2Deg;
-        var roatation = Quaternion.Euler(new Vector3(0, -angle + 90, 0));
-        target.rotation = roatation; 
-        //animator.SetFloat(horizontalValue, roatation.eulerAngles.y);
-        //Debug.Log(target.rotation.eulerAngles.y);
+        Vector3 mousePos = Input.mousePosition;
+        Vector3 objPosition = Camera.main.WorldToScreenPoint(transform.position);
+        Vector3 deltaVector = new Vector3(objPosition.x - mousePos.x, objPosition.y - mousePos.y, objPosition.z);
+
+        float angle = Mathf.Atan2(deltaVector.y, deltaVector.x) * Mathf.Rad2Deg;
+        transform.rotation = Quaternion.Euler(new Vector3(0, -angle - 90, 0));
     }
 
     public void OnJump(InputAction.CallbackContext ctx)
