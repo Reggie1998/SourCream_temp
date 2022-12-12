@@ -261,7 +261,7 @@ BlendTree:
     m_Mirror: 0
   - serializedVersion: 2
     m_Motion: {fileID: 7400004, guid: 83ed209ea436efc4aba715fe2858546f, type: 3}
-    m_Threshold: 0.0625
+    m_Threshold: 0.06746278
     m_Position: {x: 6, y: 6}
     m_TimeScale: 1
     m_CycleOffset: 0
@@ -387,13 +387,45 @@ BlendTree:
     m_CycleOffset: 0
     m_DirectBlendParameter: lookingAngle
     m_Mirror: 0
+  - serializedVersion: 2
+    m_Motion: {fileID: 7400006, guid: 83ed209ea436efc4aba715fe2858546f, type: 3}
+    m_Threshold: 0.53125
+    m_Position: {x: -7.58, y: -3.91}
+    m_TimeScale: 1
+    m_CycleOffset: 0
+    m_DirectBlendParameter: forward
+    m_Mirror: 0
+  - serializedVersion: 2
+    m_Motion: {fileID: 7400012, guid: 83ed209ea436efc4aba715fe2858546f, type: 3}
+    m_Threshold: 0.5625
+    m_Position: {x: -7.4, y: -4.18}
+    m_TimeScale: 1
+    m_CycleOffset: 0
+    m_DirectBlendParameter: forward
+    m_Mirror: 0
+  - serializedVersion: 2
+    m_Motion: {fileID: 7400014, guid: 83ed209ea436efc4aba715fe2858546f, type: 3}
+    m_Threshold: 0.59375
+    m_Position: {x: 7.58, y: -3.46}
+    m_TimeScale: 1
+    m_CycleOffset: 0
+    m_DirectBlendParameter: forward
+    m_Mirror: 0
+  - serializedVersion: 2
+    m_Motion: {fileID: 7400008, guid: 83ed209ea436efc4aba715fe2858546f, type: 3}
+    m_Threshold: 0.625
+    m_Position: {x: 7.67, y: -3.26}
+    m_TimeScale: 1
+    m_CycleOffset: 0
+    m_DirectBlendParameter: forward
+    m_Mirror: 0
   m_BlendParameter: right
   m_BlendParameterY: forward
   m_MinThreshold: 0
   m_MaxThreshold: 0.5
-  m_UseAutomaticThresholds: 1
+  m_UseAutomaticThresholds: 0
   m_NormalizedBlendValues: 0
-  m_BlendType: 3
+  m_BlendType: 2
 --- !u!1102 &3162911621714326224
 AnimatorState:
   serializedVersion: 6
@@ -442,7 +474,7 @@ AnimatorStateMachine:
     m_Position: {x: -480, y: -80, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 7556685532962258337}
-    m_Position: {x: 80, y: 0, z: 0}
+    m_Position: {x: 80, y: 60, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -6844272450597394341}
     m_Position: {x: 390, y: 140, z: 0}

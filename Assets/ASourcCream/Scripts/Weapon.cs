@@ -20,7 +20,13 @@ public class Weapon : MonoBehaviour
 
     public void OnTriggerEnter(Collider collider)
     {
+        //Debug.Log("enter");
         holder.onColide(collider);
+    }
+
+    public void OnTriggerExit(Collider collider)
+    {
+        //Debug.Log("exit");
     }
 
 }

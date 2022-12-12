@@ -15,6 +15,15 @@ public class CharMovement : MonoBehaviour
     [SerializeField]
     private float inAttackSlowAmount = 2.0f;
 
+    [SerializeField]
+    private GameObject projectile;
+
+    [SerializeField]
+    private Transform projectileStartLocation;
+
+    private Vector3 gizmoThing;
+    private Ray gizmoLine;
+
     // <------------------------------- MOVEMENT ------------------------------- //
     [SerializeField]
     private float movementSpeed = 1.0f;
@@ -66,7 +75,6 @@ public class CharMovement : MonoBehaviour
         isRunningHash = Animator.StringToHash("isRunning");
         forward = Animator.StringToHash("forward");
         right = Animator.StringToHash("right");
-
     }
 
     void Awake()
@@ -77,7 +85,8 @@ public class CharMovement : MonoBehaviour
 
     // Update is called once per frame
     void Update()
-    {
+    {   
+        HandleRotation();
         HandleAttackAction();
         HandleMovementAnims();
         HandleGravity();
@@ -88,7 +97,7 @@ public class CharMovement : MonoBehaviour
         if (Time.time > nextActionTime) { //TODO: FEEL FREE TO UNDO THIS DUMB SHIT also remove nextActionTime += period; in OnFire
             nextActionTime += period;
             if (isAttacking) {
-            isAttacking = animator.GetCurrentAnimatorStateInfo(1).IsName("attack");
+                isAttacking = animator.GetCurrentAnimatorStateInfo(1).IsName("attack");
             }
         } 
     }
@@ -105,16 +114,12 @@ public class CharMovement : MonoBehaviour
         } else {
             lateralVelocity = Vector2.Lerp(lateralAirVelocity, lateralVelocity, airTurnSpeed);
         }
-        Debug.Log(isAttacking);
+
         if (isAttacking) {
             var movementSpeedAfterSlow = movementSpeed - inAttackSlowAmount;
             lateralVelocity *= movementSpeedAfterSlow;
         } else {
             lateralVelocity *= movementSpeed;
-            var lookAt = new Vector3(lateralVelocity.x, 0.0f, lateralVelocity.y);
-            if (lookAt.magnitude > 0) {
-                transform.rotation = Quaternion.LookRotation(new Vector3(lateralVelocity.x, 0.0f, lateralVelocity.y)); 
-            }
         }
         charController.Move(new Vector3(lateralVelocity.x, inputVelocity.y, lateralVelocity.y) * Time.deltaTime);
     }
@@ -139,7 +144,6 @@ public class CharMovement : MonoBehaviour
         if(ctx.started) {
            movementKeyPressed = true; 
         }
-        //Debug.Log(incVelocity);
         // If in the air (!grounded), and not moving (x,y both less than 0.2) -> Don't do anything
         if (!(incVelocity.x == 0 && incVelocity.y == 0 && !charController.isGrounded))
         {
@@ -155,8 +159,11 @@ public class CharMovement : MonoBehaviour
         if (charController.isGrounded)
         {   
             var multiplier = isAttacking ? 3 : 10;
+            
+            //TODO: => smooth value update / lerp? 
             var tempForward = Vector3.Dot(transform.forward, new Vector3(inputVelocity.x, 0.0f,inputVelocity.z)) * multiplier;
             var tempRight = Vector3.Dot(transform.right, new Vector3(inputVelocity.x, 0.0f,inputVelocity.z)) * multiplier;
+
             animator.SetFloat(forward, tempForward);
             animator.SetFloat(right, tempRight);
         }
@@ -197,6 +204,7 @@ public class CharMovement : MonoBehaviour
             inputVelocity.y = jumpVelocity;
         }
     }
+    
     public void lookTowardCursor() {
         Vector3 mousePosition;
         Vector3 objPosition;
@@ -209,7 +217,7 @@ public class CharMovement : MonoBehaviour
         mousePosition.y = mousePosition.y - objPosition.y;
         angle = Mathf.Atan2(mousePosition.y, mousePosition.x) * Mathf.Rad2Deg;
         var roatation = Quaternion.Euler(new Vector3(0, -angle + 90, 0));
-        target.rotation = roatation;
+        target.rotation = Quaternion.Lerp(transform.rotation, roatation, 5f * Time.deltaTime);
     }
 
     public void onFire(InputAction.CallbackContext ctx)
@@ -219,12 +227,51 @@ public class CharMovement : MonoBehaviour
                 isAttacking = true;
                 nextActionTime += period;
                 animator.SetTrigger("Attack");
-                lookTowardCursor();
+                //lookTowardCursor();
             }
         }
     }
 
+    public void onMouseRight(InputAction.CallbackContext ctx) 
+    {
+
+        Vector3 mousePosition = Input.mousePosition;
+        RaycastHit hit;
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        
+        LayerMask mask = LayerMask.GetMask("Terrain");
+        if (Physics.Raycast(ray, out hit, mask)) {
+            Debug.Log(projectileStartLocation.localPosition.y);
+            float yPositon = hit.point.y + projectileStartLocation.localPosition.y + 1.0f;
+
+            if (yPositon > projectileStartLocation.transform.position.y + 1.0f) {
+                yPositon = projectileStartLocation.transform.position.y + 1.0f;
+            } else if (yPositon < projectileStartLocation.transform.position.y - 1.0f ) {
+                yPositon = projectileStartLocation.transform.position.y - 2.0f;
+            }
+
+            var hitLocation = new Vector3(hit.point.x, yPositon, hit.point.z);
+            gizmoThing = hitLocation;
+            ProjectileSpawner.shootSimpleProjectile(hitLocation, projectileStartLocation.position, projectile, 10.0f);
+
+        }
+    }
+
     public void onColide(Collider colider) {
-        Debug.Log(colider.transform.gameObject.layer);
+        //Debug.Log(colider.transform.gameObject.layer);
+        if (colider.transform.gameObject.layer == 6 && isAttacking) {
+            //Debug.Log("HIt");
+            var stats = colider.GetComponent<StatsComponent>();
+            stats.Damage(20.0f);
+        }
+        
+    }
+
+    void OnDrawGizmos()
+    {
+        // Draw a yellow sphere at the transform's position
+        Gizmos.color = new Color(246, 182, 215, 0.4f);
+        Gizmos.DrawSphere(gizmoThing, 0.2f);
+        Gizmos.DrawRay(projectileStartLocation.position, gizmoThing);
     }
 }

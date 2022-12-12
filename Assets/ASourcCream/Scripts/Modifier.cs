@@ -44,12 +44,17 @@ public class Modifier
         t.Elapsed += (sender, e) => UndoAddModifier(sender, e, value);
         t.Start();
         this.timers.Add(t);
-        Debug.Log(this.value);
+        //Debug.Log(this.value);
+    }
+
+    public void InstantModifier(float value)
+    {
+        this.value += value;
     }
 
     private void UndoAddModifier(object sender, ElapsedEventArgs e, float modValue)
     {
         this.value -= modValue;
-        Debug.Log(this.value);
+        //Debug.Log(this.value);
     }
 }
