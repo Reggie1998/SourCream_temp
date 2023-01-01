@@ -104,11 +104,11 @@ public class Enemy : MonoBehaviour
     }
 
     private void Attack() 
-    {   var positionWithOffset = new Vector3(transform.position.x, transform.position.y + 25.0f, transform.position.z + 20.0f);
+    {   var positionWithOffset = new Vector3(transform.position.x, transform.position.y + 3.0f, transform.position.z + 3.0f);
         
         if (!once) {
             once = true;
-            ProjectileSpawner.shootSimpleProjectile(player.position, positionWithOffset, projectile, 200000.0f);
+            ProjectileSpawner.shootSimpleProjectile(player.position, positionWithOffset, projectile, 200.0f);
         }
     }
 
@@ -122,7 +122,46 @@ public class Enemy : MonoBehaviour
         Gizmos.color = new Color(246, 182, 215, 0.4f);
         Gizmos.DrawSphere(transform.position, sightRange);
         Gizmos.color = new Color(100, 100, 100, 0.4f);
-        Gizmos.DrawSphere(transform.position, attackRange);
+        Gizmos.DrawWireSphere(transform.position, attackRange);
+        
     }
    
 }
+
+/*
+x = cx + r * cos(a)
+y = cy + r * sin(a)
+using UnityEngine;
+
+public class CircleGizmo : MonoBehaviour
+{
+    public float radius = 1.0f; // radius of the circle gizmo
+    public int segments = 36; // number of segments in the circle
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.yellow; // set the color of the gizmo
+
+        // calculate the points of the circle
+        Vector3[] points = new Vector3[segments + 1];
+        float angle = 0f;
+        float angleStep = 360f / segments;
+        for (int i = 0; i <= segments; i++)
+        {
+            points[i] = new Vector3(
+                radius * Mathf.Cos(angle * Mathf.Deg2Rad),
+                radius * Mathf.Sin(angle * Mathf.Deg2Rad),
+                0f
+            );
+            angle += angleStep;
+        }
+
+        // draw the lines between the points
+        Vector3 center = transform.position;
+        for (int i = 0; i < segments; i++)
+        {
+            Gizmos.DrawLine(center + points[i], center + points[i + 1]);
+        }
+    }
+}
+*/

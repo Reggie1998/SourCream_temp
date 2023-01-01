@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,7 +6,9 @@ using UnityEngine.InputSystem;
 
 
 public class CharMovement : MonoBehaviour
-{
+{   
+    private IndicatorController indicatorController;
+    private SkillsController skillsController;
     // <------------------------------- SETTINGS ------------------------------- //
     [SerializeField]
     private bool lookAtMouse = true;
@@ -24,6 +27,8 @@ public class CharMovement : MonoBehaviour
     private Vector3 gizmoThing;
     private Ray gizmoLine;
 
+    private Dictionary<string, Action> abilityList;
+
     // <------------------------------- MOVEMENT ------------------------------- //
     [SerializeField]
     private float movementSpeed = 1.0f;
@@ -38,16 +43,12 @@ public class CharMovement : MonoBehaviour
     private Vector2 lateralAirVelocity; // Current velocity in the X,Z plane
     private Vector3 inputVelocity; // Movement keys input in X,Z plane (0-1f)
     private CharacterController charController;
-    [SerializeField]
-    private GameObject weaponR;
 
     private bool movementKeyPressed = false;
 
     private float currentRotation;
     [SerializeField]
     private float rotationSpeed = 10.0f;
-
-
 
     // ------------------------------- PHYSICS ------------------------------- //
     [SerializeField]
@@ -75,12 +76,15 @@ public class CharMovement : MonoBehaviour
         isRunningHash = Animator.StringToHash("isRunning");
         forward = Animator.StringToHash("forward");
         right = Animator.StringToHash("right");
+        
+        
     }
 
     void Awake()
     {
         charController = GetComponent<CharacterController>();
         animator = GetComponentInChildren<Animator>();
+        skillsController = GetComponent<SkillsController>();
     }
 
     // Update is called once per frame
@@ -135,8 +139,8 @@ public class CharMovement : MonoBehaviour
         }
     }
 
-    public void OnMove(InputAction.CallbackContext ctx) // TODO: these events run 2-3 times on click consider doing only once through logic
-    {
+    public void OnMovement(InputAction.CallbackContext ctx) // TODO: these events run 2-3 times on click consider doing only once through logic
+    {   
         var incVelocity = ctx.ReadValue<Vector2>().normalized;
         if(ctx.canceled) {
             movementKeyPressed = false;
@@ -220,43 +224,44 @@ public class CharMovement : MonoBehaviour
         target.rotation = Quaternion.Lerp(transform.rotation, roatation, 5f * Time.deltaTime);
     }
 
-    public void onFire(InputAction.CallbackContext ctx)
+    public void OnFire(InputAction.CallbackContext ctx)
     {
         if (ctx.started) {
             if (!isAttacking) {
                 isAttacking = true;
                 nextActionTime += period;
                 animator.SetTrigger("Attack");
-                //lookTowardCursor();
             }
         }
     }
-
-    public void onMouseRight(InputAction.CallbackContext ctx) 
+    //MOVE THIS to attack related
+    public void onMbR(InputAction.CallbackContext ctx) 
     {
+        if (ctx.started) {
+            Vector3 mousePosition = Input.mousePosition;
+            RaycastHit hit;
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            
+            LayerMask mask = LayerMask.GetMask("Terrain");
+            if (Physics.Raycast(ray, out hit, mask)) {
+                Debug.Log(projectileStartLocation.localPosition.y);
+                float yPositon = hit.point.y + projectileStartLocation.localPosition.y + 1.0f;
 
-        Vector3 mousePosition = Input.mousePosition;
-        RaycastHit hit;
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        
-        LayerMask mask = LayerMask.GetMask("Terrain");
-        if (Physics.Raycast(ray, out hit, mask)) {
-            Debug.Log(projectileStartLocation.localPosition.y);
-            float yPositon = hit.point.y + projectileStartLocation.localPosition.y + 1.0f;
+                if (yPositon > projectileStartLocation.transform.position.y + 1.0f) {
+                    yPositon = projectileStartLocation.transform.position.y + 1.0f;
+                } else if (yPositon < projectileStartLocation.transform.position.y - 1.0f ) {
+                    yPositon = projectileStartLocation.transform.position.y - 2.0f;
+                }
 
-            if (yPositon > projectileStartLocation.transform.position.y + 1.0f) {
-                yPositon = projectileStartLocation.transform.position.y + 1.0f;
-            } else if (yPositon < projectileStartLocation.transform.position.y - 1.0f ) {
-                yPositon = projectileStartLocation.transform.position.y - 2.0f;
+                var hitLocation = new Vector3(hit.point.x, yPositon, hit.point.z);
+                gizmoThing = hitLocation;
+                ProjectileSpawner.shootSimpleProjectile(hitLocation, projectileStartLocation.position, projectile, 10.0f);
+
             }
-
-            var hitLocation = new Vector3(hit.point.x, yPositon, hit.point.z);
-            gizmoThing = hitLocation;
-            ProjectileSpawner.shootSimpleProjectile(hitLocation, projectileStartLocation.position, projectile, 10.0f);
-
         }
-    }
 
+    }
+    //MOVE THIS
     public void onColide(Collider colider) {
         //Debug.Log(colider.transform.gameObject.layer);
         if (colider.transform.gameObject.layer == 6 && isAttacking) {
@@ -266,12 +271,47 @@ public class CharMovement : MonoBehaviour
         }
         
     }
-
+    //MOVE THIS
     void OnDrawGizmos()
     {
         // Draw a yellow sphere at the transform's position
         Gizmos.color = new Color(246, 182, 215, 0.4f);
         Gizmos.DrawSphere(gizmoThing, 0.2f);
-        Gizmos.DrawRay(projectileStartLocation.position, gizmoThing);
+    }
+
+    public void OnAbility1(InputAction.CallbackContext ctx)
+    {   
+        CommonParams commonParams = new CommonParams();
+
+        var mousePos = GenericHelper.GetMousePostion();
+        var rotation = new Vector3(this.transform.rotation.x, this.transform.rotation.y, this.transform.rotation.z);
+        var mousePosWithY = new Vector3 (mousePos.x, mousePos.y + 0.5f, mousePos.z);
+
+        //Setting the world parameters for the skill
+        commonParams.SetValues(IndicatorShape.Circle, new Vector3(10.0f, 10.0f, 10.0f), mousePosWithY, rotation);
+
+        //Currently being used in order to click and drag indicator, and do skill upon release rather than hold 
+        if(ctx.phase == InputActionPhase.Started) {
+            skillsController.UseAOESkill(commonParams, Phase.Start);
+        }
+        if (ctx.phase == InputActionPhase.Canceled) {
+            skillsController.UseAOESkill(commonParams, Phase.End);
+        }
+    }
+
+    public void Ability2(InputAction.CallbackContext ctx)
+    {
+        Debug.Log("2");
+    }
+
+    public void Ability3(InputAction.CallbackContext ctx)
+    {
+        Debug.Log("3");
+    }
+
+    public void Ability4(InputAction.CallbackContext ctx)
+    {
+        Debug.Log("4");
     }
 }
+

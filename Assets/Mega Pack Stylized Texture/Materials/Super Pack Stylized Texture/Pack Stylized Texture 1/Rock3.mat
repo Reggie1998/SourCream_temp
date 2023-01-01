@@ -9,6 +9,8 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: Rock3
   m_Shader: {fileID: 4800000, guid: 0e9d5a909a1f7e84882a534d0d11e49f, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
   m_InvalidKeywords:
   - _NORMALMAP
@@ -20,6 +22,7 @@ Material:
   m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses: []
+  m_LockedProperties: _OcclusionMap
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
@@ -82,9 +85,9 @@ Material:
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
     - _GlossMapScale: 1
-    - _Glossiness: 25.91
+    - _Glossiness: 25.1
     - _GlossyReflections: 1
-    - _Metallic: 0
+    - _Metallic: -26.78
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.005
@@ -104,8 +107,8 @@ Material:
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _UvOffset: {r: 0, g: 0, b: 0, a: 0}
-    - _UvTiling: {r: 0.6, g: 0.6, b: 0, a: 0}
+    - _UvOffset: {r: 1.26, g: 0, b: 0, a: 0}
+    - _UvTiling: {r: 0.48, g: 0.58, b: 0, a: 0}
   m_BuildTextureStacks: []
 --- !u!114 &8210361234193856652
 MonoBehaviour:
@@ -119,4 +122,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  version: 5
+  version: 6

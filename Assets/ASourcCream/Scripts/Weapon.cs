@@ -9,7 +9,7 @@ public class Weapon : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        holder = GetComponentInParent<CharMovement>();
+        //holder = GetComponentInParent<CharMovement>();
     }
 
     // Update is called once per frame
@@ -20,13 +20,17 @@ public class Weapon : MonoBehaviour
 
     public void OnTriggerEnter(Collider collider)
     {
-        //Debug.Log("enter");
-        holder.onColide(collider);
+        Debug.Log("enter");
+        if (collider.transform.gameObject.layer == 6) {
+            Debug.Log("DO dmg");
+            var statsComponent = collider.transform.gameObject.GetComponent<StatsComponent>();
+            statsComponent.Damage(20.0f);
+        }
     }
 
     public void OnTriggerExit(Collider collider)
     {
-        //Debug.Log("exit");
+        Debug.Log("exit");
     }
 
 }
